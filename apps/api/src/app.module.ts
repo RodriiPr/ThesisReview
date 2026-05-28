@@ -24,8 +24,12 @@ import { TemplatesModule } from './templates/templates.module';
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
     BullModule.forRoot({
-      connection: process.env.REDIS_URL
-        ? (process.env.REDIS_URL as any)
+        connection: process.env.REDIS_URL
+        ? {
+            url: process.env.REDIS_URL,
+            // Muchos proveedores en la nube (como Render Redis o Upstash) requieren TLS activo
+            tls: process.env.REDIS_USE_TLS === 'false' ? undefined : {}, 
+          }
         : {
             host: process.env.REDIS_HOST ?? 'localhost',
             port: Number(process.env.REDIS_PORT ?? 6379),
