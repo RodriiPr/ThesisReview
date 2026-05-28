@@ -24,10 +24,14 @@ import { TemplatesModule } from './templates/templates.module';
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
     BullModule.forRoot({
-      connection: {
-        host: process.env.REDIS_HOST ?? 'localhost',
-        port: Number(process.env.REDIS_PORT ?? 6379),
-      },
+      connection: process.env.REDIS_URL
+        ? (process.env.REDIS_URL as any)
+        : {
+            host: process.env.REDIS_HOST ?? 'localhost',
+            port: Number(process.env.REDIS_PORT ?? 6379),
+            password: process.env.REDIS_PASSWORD,
+            tls: process.env.REDIS_USE_TLS === 'true' ? {} : undefined,
+          },
     }),
     EventEmitterModule.forRoot(),
     PrismaModule,
