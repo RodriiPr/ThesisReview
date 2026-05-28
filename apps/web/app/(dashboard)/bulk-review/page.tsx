@@ -146,7 +146,9 @@ export default function BulkReviewPage() {
         </div>
       ) : advances.length === 0 ? (
         <div className="rounded-xl border border-dashed border-gray-200 p-12 text-center">
-          <p className="text-sm text-gray-400">No hay avances con estado "{STATUS_OPTIONS.find(o => o.value === filterStatus)?.label}"</p>
+         <p className="text-sm text-gray-400">
+          No hay avances con estado &quot;{STATUS_OPTIONS.find(o => o.value === filterStatus)?.label}&quot;
+        </p>
         </div>
       ) : (
         <div className="rounded-xl border border-gray-200 bg-white overflow-hidden">
