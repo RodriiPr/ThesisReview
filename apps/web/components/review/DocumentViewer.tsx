@@ -27,16 +27,30 @@ export function DocumentViewer({ advanceId }: DocumentViewerProps) {
     if (!previewData?.url) return;
 
     let isMounted = true;
+    interface PdfJsLib {
+      GlobalWorkerOptions: { workerSrc: string };
+      getDocument: (url: string) => {
+        promise: Promise<{
+          numPages: number;
+          getPage: (n: number) => Promise<unknown>;
+        }>;
+      };
+    }
+
     const loadPdf = async () => {
       try {
-        const pdfjsLib = (window as any).pdfjsLib || (window as any)['pdfjs-dist/build/pdf'];
+        const win = window as unknown as {
+          pdfjsLib?: PdfJsLib;
+          'pdfjs-dist/build/pdf'?: PdfJsLib;
+        };
+        const pdfjsLib = win.pdfjsLib || win['pdfjs-dist/build/pdf'];
         
         if (!pdfjsLib) {
-          return new Promise((resolve) => {
+          return new Promise<PdfJsLib>((resolve) => {
             const script = document.createElement('script');
             script.src = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js';
             script.onload = () => {
-              const lib = (window as any).pdfjsLib;
+              const lib = win.pdfjsLib;
               if (lib) {
                 lib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
                 resolve(lib);
@@ -54,7 +68,7 @@ export function DocumentViewer({ advanceId }: DocumentViewerProps) {
         const doc = await loadingTask.promise;
         
         if (isMounted) {
-          setPdfDoc(doc as any);
+          setPdfDoc(doc as { numPages: number; getPage: (n: number) => Promise<unknown> });
           setTotalPages(doc.numPages);
         }
       } catch (error) {

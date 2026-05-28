@@ -8,7 +8,7 @@ export default function StatsPage() {
   const { data, isLoading } = useStats();
 
   const advancesByStatus = Array.isArray(data?.advancesByStatus)
-    ? data.advancesByStatus.map((s: any) => ({ status: s.status, count: Number(s.count) }))
+    ? data.advancesByStatus.map((s: { status: string; count: string | number }) => ({ status: s.status, count: Number(s.count) }))
     : [];
 
   return (

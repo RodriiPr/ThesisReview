@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiClient } from '@/lib/api-client';
+import { AxiosError, isAxiosError } from 'axios';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 import { Loader2, Plus, Pencil, Trash2, Check } from 'lucide-react';
@@ -181,8 +182,12 @@ export default function UsersPage() {
       setShowForm(false);
       qc.invalidateQueries({ queryKey: ['users'] });
     },
-    onError: (err: any) =>
-      toast.error(err?.response?.data?.message ?? 'Error al crear usuario'),
+    onError: (err: Error | AxiosError) => {
+      const message = isAxiosError(err)
+        ? (err.response?.data as { message?: string })?.message
+        : err.message;
+      toast.error(message ?? 'Error al crear usuario');
+    },
   });
 
   const updateMutation = useMutation({
@@ -194,7 +199,12 @@ export default function UsersPage() {
       setEditOrcid('');
       qc.invalidateQueries({ queryKey: ['users'] });
     },
-    onError: (err: any) => toast.error(err?.response?.data?.message ?? 'No se pudo actualizar el usuario'),
+    onError: (err: Error | AxiosError) => {
+      const message = isAxiosError(err)
+        ? (err.response?.data as { message?: string })?.message
+        : err.message;
+      toast.error(message ?? 'No se pudo actualizar el usuario');
+    },
   });
 
   const deleteMutation = useMutation({
@@ -251,7 +261,7 @@ export default function UsersPage() {
       {showForm && (
         <UserForm
           programs={programs}
-          onSave={(data) => createMutation.mutate(data as any)}
+          onSave={(data) => createMutation.mutate(data)}
           onCancel={() => setShowForm(false)}
         />
       )}

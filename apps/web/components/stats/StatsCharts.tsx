@@ -1,6 +1,6 @@
 'use client';
 import React, { useEffect, useRef } from 'react';
-import { Chart, DoughnutController, ArcElement, Tooltip, Legend, BarController, BarElement, CategoryScale, LinearScale } from 'chart.js';
+import { Chart, DoughnutController, ArcElement, Tooltip, Legend, BarController, BarElement, CategoryScale, LinearScale, ChartOptions } from 'chart.js';
 import { cn } from '@/lib/utils';
 
 Chart.register(DoughnutController, ArcElement, Tooltip, Legend, BarController, BarElement, CategoryScale, LinearScale);
@@ -58,7 +58,7 @@ export function AveragesBar({ ai, human, plagiarism }: { ai?: number; human?: nu
         responsive: true,
         scales: { y: { beginAtZero: true } },
         plugins: { legend: { display: false } },
-      } as any,
+      } as unknown as ChartOptions<'bar'>,
     });
 
     return () => chart.destroy();

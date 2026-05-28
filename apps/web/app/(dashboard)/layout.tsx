@@ -47,7 +47,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     try {
       const { apiClient } = await import('@/lib/api-client');
       await apiClient.post('/auth/logout', { refreshToken });
-    } catch (error) {
+    } catch {
       // Ignoramos el error silenciosamente. Si el backend da 401, 
       // significa que el token ya era inválido de todos modos.
       console.warn('El servidor rechazó el logout, forzando salida local.');
