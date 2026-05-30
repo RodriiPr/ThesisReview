@@ -20,10 +20,11 @@ export class StorageService implements OnModuleInit {
         useSSL: process.env.MINIO_USE_SSL === 'true',
         accessKey: process.env.MINIO_ACCESS_KEY ?? 'minioadmin',
         secretKey: process.env.MINIO_SECRET_KEY ?? 'minioadmin123',
+        region: process.env.MINIO_REGION ?? 'us-east-1',
       });
       const exists = await this.client.bucketExists(this.bucket);
       if (!exists) {
-        await this.client.makeBucket(this.bucket, 'us-east-1');
+        await this.client.makeBucket(this.bucket, process.env.MINIO_REGION ?? 'us-east-1');
       }
       this.ready = true;
       this.logger.log(`MinIO bucket "${this.bucket}" ready`);
