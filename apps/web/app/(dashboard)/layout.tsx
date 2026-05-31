@@ -15,12 +15,14 @@ import {
   GraduationCap,
   Users,
   BookOpen,
+  FileText,
 } from 'lucide-react';
 
 const NAV_ITEMS = [
   { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard, roles: ['ADVISOR', 'COORDINATOR', 'ADMIN'] },
   { href: '/advances/upload', label: 'Cargar avance', icon: Upload, roles: ['STUDENT', 'ADVISOR', 'COORDINATOR', 'ADMIN'] },
   { href: '/advances', label: 'Avances', icon: FileSearch, roles: ['ADVISOR', 'COORDINATOR', 'ADMIN'] },
+  { href: '/thesis-generator', label: 'Generador de Tesis', icon: FileText, roles: ['STUDENT', 'ADVISOR', 'COORDINATOR', 'ADMIN'] },
   { href: '/student/dashboard', label: 'Mis avances', icon: BookOpen, roles: ['STUDENT'] },
   { href: '/bulk-review', label: 'Revisión por lotes', icon: Layers, roles: ['COORDINATOR', 'ADMIN'] },
   { href: '/stats', label: 'Estadísticas', icon: BarChart3, roles: ['COORDINATOR', 'ADMIN'] },
@@ -76,7 +78,10 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
         <nav className="flex-1 px-2 py-3 space-y-0.5 overflow-y-auto">
           {visibleNav.map((item) => {
-            const active = pathname === item.href || pathname.startsWith(item.href + '/');
+            const active =
+              pathname === item.href ||
+              (pathname.startsWith(item.href + '/') &&
+                !NAV_ITEMS.some((i) => i.href !== item.href && pathname === i.href));
             return (
               <Link
                 key={item.href}

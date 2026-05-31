@@ -90,6 +90,11 @@ export class AdvancesController {
     return this.advancesService.getPreviewUrl(id);
   }
 
+  @Get(':id/preview-content')
+  async previewContent(@Param('id') id: string) {
+    return this.advancesService.getPreviewContent(id);
+  }
+
   @Get(':id/download')
   async download(@Param('id') id: string, @Res({ passthrough: true }) res: Response) {
     const { buffer, contentType, filename } = await this.advancesService.downloadFile(id);

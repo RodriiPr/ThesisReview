@@ -28,6 +28,8 @@ export interface AnalysisResult {
 
 export interface PipelineOptions {
   openaiKey?: string;
+  ollamaBaseUrl?: string;
+  ollamaModel?: string;
   maxGrade?: number;
   model?: string;
 }

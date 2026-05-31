@@ -6,6 +6,16 @@ import Link from 'next/link';
 import { apiClient } from '@/lib/api-client';
 import { Loader2 } from 'lucide-react';
 
+const STATUS_LABELS: Record<string, string> = {
+  APPROVED: 'Aprobado',
+  HUMAN_REVIEW: 'En revisión',
+  OBSERVED: 'Observado',
+  REJECTED: 'Rechazado',
+  PENDING: 'Pendiente',
+  AI_PROCESSING: 'Analizando IA',
+  AI_COMPLETE: 'IA completado',
+};
+
 export default function AdvancesListPage() {
   const router = useRouter();
 
@@ -25,9 +35,9 @@ export default function AdvancesListPage() {
         </div>
         <Link
           href="/advances/upload"
-          className="h-9 px-4 rounded-lg bg-[#185FA5] text-white text-sm font-medium hover:bg-[#0C447C]"
+          className="inline-flex items-center justify-center gap-1.5 h-10 px-5 rounded-lg bg-[#185FA5] text-white text-sm font-medium leading-5 hover:bg-[#0C447C]"
         >
-          Cargar avance
+          + Cargar avance
         </Link>
       </div>
 
@@ -50,7 +60,7 @@ export default function AdvancesListPage() {
                 <p className="text-sm font-medium text-gray-900">{adv.title}</p>
                 <p className="text-xs text-gray-500">{adv.student?.name ?? '—'}</p>
               </div>
-              <span className="text-xs text-gray-500">{adv.status}</span>
+              <span className="text-xs text-gray-500">{STATUS_LABELS[adv.status] ?? adv.status}</span>
             </button>
           ))}
         </div>

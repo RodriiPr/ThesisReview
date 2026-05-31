@@ -322,7 +322,7 @@ export function AIEvaluationPanel({ analysis }: AIEvaluationPanelProps) {
                   : 'border-gray-200 text-gray-600 hover:border-gray-300',
               )}
             >
-              {f === 'ALL' ? 'Todos' : f} ({count})
+              {f === 'ALL' ? 'Todos' : SEVERITY_CONFIG[f as keyof typeof SEVERITY_CONFIG]?.label ?? f} ({count})
             </button>
           );
         })}

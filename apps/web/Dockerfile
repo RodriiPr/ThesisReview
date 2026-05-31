@@ -5,11 +5,13 @@ WORKDIR /app
 FROM base AS deps
 COPY package.json pnpm-workspace.yaml pnpm-lock.yaml* ./
 COPY apps/web/package.json ./apps/web/
-RUN pnpm install --frozen-lockfile --filter @thesis-review/web...
+RUN pnpm install --frozen-lockfile --ignore-scripts --filter @thesis-review/web...
 
 FROM base AS builder
-COPY --from=deps /app/node_modules ./node_modules
-COPY . .
+COPY --from=deps /app .
+COPY apps/web ./apps/web
+COPY packages ./packages
+COPY package.json pnpm-workspace.yaml turbo.json ./
 ENV NEXT_TELEMETRY_DISABLED=1
 RUN pnpm --filter @thesis-review/web build
 

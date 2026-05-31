@@ -5,6 +5,7 @@ import {
 } from '@nestjs/common';
 import { InjectQueue } from '@nestjs/bullmq';
 import { Queue } from 'bullmq';
+import mammoth from 'mammoth';
 import { PrismaService } from '../prisma/prisma.service';
 import { StorageService } from '../storage/storage.service';
 
@@ -193,9 +194,25 @@ export class AdvancesService {
   async getPreviewUrl(advanceId: string) {
     const advance = await this.prisma.advance.findUniqueOrThrow({
       where: { id: advanceId },
-      select: { fileKey: true },
+      select: { fileKey: true, fileType: true },
     });
     const url = await this.storage.getPresignedUrl(advance.fileKey, 900);
-    return { url };
+    return { url, fileType: advance.fileType };
+  }
+
+  async getPreviewContent(advanceId: string): Promise<{ html: string; fileType: string }> {
+    const advance = await this.prisma.advance.findUniqueOrThrow({
+      where: { id: advanceId },
+      select: { fileKey: true, fileType: true },
+    });
+
+    if (advance.fileType !== 'docx') {
+      const url = await this.storage.getPresignedUrl(advance.fileKey, 900);
+      return { html: '', fileType: advance.fileType };
+    }
+
+    const buffer = await this.storage.download(advance.fileKey);
+    const result = await mammoth.convertToHtml({ buffer });
+    return { html: result.value, fileType: 'docx' };
   }
 }

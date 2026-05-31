@@ -12,6 +12,8 @@
     "lint": "eslint \"{src,test}/**/*.ts\" --fix"
   },
   "dependencies": {
+    "@langchain/ollama": "^0.2.4",
+    "@langchain/openai": "^0.5.10",
     "@nestjs/bullmq": "^11.0.2",
     "@nestjs/common": "^11.0.1",
     "@nestjs/config": "^4.0.2",
@@ -22,15 +24,20 @@
     "@nestjs/platform-express": "^11.0.1",
     "@thesis-review/ai-engine": "workspace:*",
     "@thesis-review/database": "workspace:*",
+    "@types/handlebars": "^4.1.0",
     "bcrypt": "^5.1.1",
     "bullmq": "^5.44.4",
     "class-transformer": "^0.5.1",
     "class-validator": "^0.14.2",
+    "docx": "^9.7.1",
+    "handlebars": "^4.7.9",
+    "mammoth": "^1.9.0",
     "minio": "^8.0.5",
-    "pdfkit": "^0.18.0",
     "passport": "^0.7.0",
     "passport-jwt": "^4.0.1",
     "passport-local": "^1.0.0",
+    "pdfkit": "^0.18.0",
+    "puppeteer": "^25.1.0",
     "reflect-metadata": "^0.2.2",
     "rxjs": "^7.8.1"
   },
@@ -39,12 +46,12 @@
     "@nestjs/schematics": "^11.0.0",
     "@nestjs/testing": "^11.0.1",
     "@types/bcrypt": "^5.0.2",
-    "@types/pdfkit": "^0.13.9",
     "@types/express": "^5.0.0",
     "@types/multer": "^1.4.12",
     "@types/node": "^24.0.0",
     "@types/passport-jwt": "^4.0.1",
     "@types/passport-local": "^1.0.38",
+    "@types/pdfkit": "^0.13.9",
     "typescript": "^5.7.3"
   }
 }

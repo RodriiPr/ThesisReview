@@ -19,6 +19,7 @@ import { UsersModule } from './users/users.module';
 import { StatsModule } from './stats/stats.module';
 import { StorageModule } from './storage/storage.module';
 import { TemplatesModule } from './templates/templates.module';
+import { ThesisGeneratorModule } from './thesis-generator/thesis-generator.module';
 
 @Module({
   imports: [
@@ -53,6 +54,7 @@ import { TemplatesModule } from './templates/templates.module';
     ReportsModule,
     UsersModule,
     FineTuningModule,
+    ThesisGeneratorModule,
   ],
   controllers: [AppController],
   providers: [AppService],

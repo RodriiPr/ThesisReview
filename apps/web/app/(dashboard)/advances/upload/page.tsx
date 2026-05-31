@@ -10,11 +10,11 @@ import { cn } from '@/lib/utils';
 
 const PIPELINE_STEPS = [
   'Subiendo archivo...',
-  'Extrayendo texto (mammoth.js / pdf-parse)...',
-  'Segmentando en chunks (LangChain.js)...',
-  'Generando embeddings (text-embedding-3-large)...',
+  'Extrayendo texto...',
+  'Segmentando en fragmentos...',
+  'Generando vectores de embedding...',
   'Comparando con documento patrón...',
-  'Analizando con GPT-4o...',
+  'Analizando con IA...',
   'Guardando hallazgos...',
   'Análisis completado',
 ];
@@ -61,7 +61,7 @@ export default function UploadPage() {
       }
     },
     onSuccess: (data) => {
-      toast.success('Avance cargado. Análisis IA iniciado en background.');
+      toast.success('Avance cargado. Análisis IA iniciado en segundo plano.');
       setTimeout(() => router.push(`/advances/${data.id}/review`), 1500);
     },
     onError: (err: unknown) => {
