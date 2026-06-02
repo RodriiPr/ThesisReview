@@ -17,6 +17,7 @@ import {
   BookOpen,
   FileText,
 } from 'lucide-react';
+import { NotificationBell } from '@/components/notifications/NotificationBell';
 
 const NAV_ITEMS = [
   { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard, roles: ['ADVISOR', 'COORDINATOR', 'ADMIN'] },
@@ -119,6 +120,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                 <div className="text-xs font-medium text-gray-900 truncate">{user.name}</div>
                 <div className="text-[10px] text-gray-400">{user.role}</div>
               </div>
+              <NotificationBell />
               <button
                 type="button"
                 onClick={handleLogout}

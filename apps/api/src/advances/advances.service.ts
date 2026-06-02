@@ -117,6 +117,18 @@ export class AdvancesService {
     });
   }
 
+  async getVersionHistory(studentId: string, advanceType: string) {
+    return this.prisma.advance.findMany({
+      where: { studentId, advanceType },
+      include: {
+        aiAnalysis: { select: { overallScore: true, gradeConverted: true, createdAt: true } },
+        review: { select: { status: true, finalGrade: true, reviewedAt: true } },
+        program: { select: { name: true } },
+      },
+      orderBy: { version: 'asc' },
+    });
+  }
+
   async listForAdvisor(
     advisorId: string,
     filters: { status?: string; programId?: string; page?: number; pageSize?: number },

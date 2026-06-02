@@ -16,6 +16,8 @@ import {
   XCircle,
   Cpu,
 } from 'lucide-react';
+import { PipelineStatus } from '@/components/pipeline/PipelineStatus';
+import { VersionHistory } from '@/components/versions/VersionHistory';
 
 const STATUS_CONFIG: Record<
   string,
@@ -78,8 +80,10 @@ export default function StudentDashboardPage() {
     ['PENDING', 'AI_PROCESSING', 'AI_COMPLETE', 'HUMAN_REVIEW'].includes(a.status),
   ).length;
 
+  const advanceTypes = [...new Set(advances.map((a) => a.advanceType))];
+
   return (
-    <div className="p-6 max-w-4xl">
+    <div className="p-6 max-w-5xl">
       <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-xl font-medium text-gray-900">Mis avances</h1>
@@ -114,85 +118,100 @@ export default function StudentDashboardPage() {
         </div>
       </div>
 
-      {pendingCount > 0 && (
-        <div className="mb-4 p-3 bg-purple-50 border border-purple-100 rounded-xl flex items-center gap-3">
-          <Cpu className="w-4 h-4 text-purple-600 animate-pulse flex-shrink-0" />
-          <p className="text-xs text-purple-700">
-            {pendingCount} avance{pendingCount > 1 ? 's' : ''} en proceso — la página se actualizará automáticamente.
-          </p>
-        </div>
-      )}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-6">
+        <div className="lg:col-span-2">
+          {pendingCount > 0 && (
+            <div className="mb-4 p-3 bg-purple-50 border border-purple-100 rounded-xl flex items-center gap-3">
+              <Cpu className="w-4 h-4 text-purple-600 animate-pulse flex-shrink-0" />
+              <p className="text-xs text-purple-700">
+                {pendingCount} avance{pendingCount > 1 ? 's' : ''} en proceso — la página se actualizará automáticamente.
+              </p>
+            </div>
+          )}
 
-      {isLoading ? (
-        <div className="flex justify-center py-16">
-          <Loader2 className="w-6 h-6 animate-spin text-gray-400" />
-        </div>
-      ) : advances.length === 0 ? (
-        <div className="rounded-xl border border-dashed border-gray-200 p-12 text-center">
-          <FileText className="w-10 h-10 text-gray-300 mx-auto mb-3" />
-          <p className="text-sm font-medium text-gray-600 mb-1">No tienes avances aún</p>
-          <p className="text-xs text-gray-400 mb-4">
-            Sube tu primer avance para recibir retroalimentación automática con IA.
-          </p>
-          <Link
-            href="/advances/upload"
-            className="inline-flex items-center gap-1.5 text-sm text-[#185FA5] hover:underline"
-          >
-            <Upload className="w-3.5 h-3.5" />
-            Cargar primer avance
-          </Link>
-        </div>
-      ) : (
-        <div className="rounded-xl border border-gray-200 bg-white divide-y divide-gray-50">
-          {advances.map((adv) => {
-            const statusCfg = STATUS_CONFIG[adv.status] ?? STATUS_CONFIG['PENDING'];
-            const StatusIcon = statusCfg.icon;
-            return (
-              <button
-                key={adv.id}
-                type="button"
-                onClick={() => router.push(`/advances/${adv.id}/review`)}
-                className="w-full flex items-center gap-4 px-5 py-4 hover:bg-gray-50 text-left
-                           transition-colors group"
+          {isLoading ? (
+            <div className="flex justify-center py-16">
+              <Loader2 className="w-6 h-6 animate-spin text-gray-400" />
+            </div>
+          ) : advances.length === 0 ? (
+            <div className="rounded-xl border border-dashed border-gray-200 p-12 text-center">
+              <FileText className="w-10 h-10 text-gray-300 mx-auto mb-3" />
+              <p className="text-sm font-medium text-gray-600 mb-1">No tienes avances aún</p>
+              <p className="text-xs text-gray-400 mb-4">
+                Sube tu primer avance para recibir retroalimentación automática con IA.
+              </p>
+              <Link
+                href="/advances/upload"
+                className="inline-flex items-center gap-1.5 text-sm text-[#185FA5] hover:underline"
               >
-                <div className="w-9 h-9 rounded-lg bg-blue-50 flex items-center justify-center flex-shrink-0">
-                  <FileText className="w-4.5 h-4.5 text-[#185FA5]" />
-                </div>
-
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-gray-900 truncate">{adv.title}</p>
-                  <p className="text-xs text-gray-500 mt-0.5 truncate">
-                    {adv.program?.name} · v{adv.version} ·{' '}
-                    {new Date(adv.createdAt).toLocaleDateString('es-PE')}
-                  </p>
-                </div>
-
-                <div className="flex items-center gap-3 flex-shrink-0">
-                  <span
-                    className={cn(
-                      'flex items-center gap-1.5 text-[11px] font-medium px-2.5 py-1 rounded-full',
-                      statusCfg.className,
-                    )}
+                <Upload className="w-3.5 h-3.5" />
+                Cargar primer avance
+              </Link>
+            </div>
+          ) : (
+            <div className="rounded-xl border border-gray-200 bg-white divide-y divide-gray-50">
+              {advances.map((adv) => {
+                const statusCfg = STATUS_CONFIG[adv.status] ?? STATUS_CONFIG['PENDING'];
+                const StatusIcon = statusCfg.icon;
+                return (
+                  <button
+                    key={adv.id}
+                    type="button"
+                    onClick={() => router.push(`/advances/${adv.id}/review`)}
+                    className="w-full flex items-center gap-4 px-5 py-4 hover:bg-gray-50 text-left
+                               transition-colors group"
                   >
-                    <StatusIcon className="w-3 h-3" />
-                    {statusCfg.label}
-                  </span>
+                    <div className="w-9 h-9 rounded-lg bg-blue-50 flex items-center justify-center flex-shrink-0">
+                      <FileText className="w-4.5 h-4.5 text-[#185FA5]" />
+                    </div>
 
-                  {adv.aiAnalysis && (
-                    <GradeCircle
-                      score={adv.aiAnalysis.overallScore}
-                      grade={adv.aiAnalysis.gradeConverted}
-                      max={maxGrade}
-                    />
-                  )}
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium text-gray-900 truncate">{adv.title}</p>
+                      <p className="text-xs text-gray-500 mt-0.5 truncate">
+                        {adv.program?.name} · v{adv.version} ·{' '}
+                        {new Date(adv.createdAt).toLocaleDateString('es-PE')}
+                      </p>
+                    </div>
 
-                  <ChevronRight className="w-4 h-4 text-gray-300 group-hover:text-gray-500 transition-colors" />
-                </div>
-              </button>
-            );
-          })}
+                    <div className="flex items-center gap-3 flex-shrink-0">
+                      <span
+                        className={cn(
+                          'flex items-center gap-1.5 text-[11px] font-medium px-2.5 py-1 rounded-full',
+                          statusCfg.className,
+                        )}
+                      >
+                        <StatusIcon className="w-3 h-3" />
+                        {statusCfg.label}
+                      </span>
+
+                      {adv.aiAnalysis && (
+                        <GradeCircle
+                          score={adv.aiAnalysis.overallScore}
+                          grade={adv.aiAnalysis.gradeConverted}
+                          max={maxGrade}
+                        />
+                      )}
+
+                      <ChevronRight className="w-4 h-4 text-gray-300 group-hover:text-gray-500 transition-colors" />
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+          )}
         </div>
-      )}
+
+        <div className="space-y-4">
+          <PipelineStatus />
+
+          {advanceTypes.length > 0 && (
+            <VersionHistory
+              advanceType={advanceTypes[0]}
+              allAdvanceTypes={advanceTypes}
+            />
+          )}
+        </div>
+      </div>
     </div>
   );
 }

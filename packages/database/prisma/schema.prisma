@@ -34,22 +34,23 @@ enum FindingSeverity {
 }
 
 model User {
-  id           String    @id @default(cuid())
-  email        String    @unique
-  passwordHash String
-  name         String
-  orcidManual  String?
-  role         Role
-  programId    String?
-  program      Program?  @relation(fields: [programId], references: [id])
-  advisees     User[]    @relation("AdvisorStudents")
-  advisor      User?     @relation("AdvisorStudents", fields: [advisorId], references: [id])
-  advisorId    String?
-  advances     Advance[]
-  reviews      Review[]
+  id            String              @id @default(cuid())
+  email         String              @unique
+  passwordHash  String
+  name          String
+  orcidManual   String?
+  role          Role
+  programId     String?
+  program       Program?            @relation(fields: [programId], references: [id])
+  advisees      User[]              @relation("AdvisorStudents")
+  advisor       User?               @relation("AdvisorStudents", fields: [advisorId], references: [id])
+  advisorId     String?
+  advances      Advance[]
+  reviews       Review[]
   refreshTokens RefreshToken[]
   passwordReset PasswordResetToken?
-  createdAt    DateTime  @default(now())
+  createdAt     DateTime            @default(now())
+  notifications Notification[]
 
   @@map("users")
 }
@@ -95,29 +96,29 @@ model TemplateChunk {
 }
 
 model Advance {
-  id            String        @id @default(cuid())
-  studentId     String
-  student       User          @relation(fields: [studentId], references: [id])
-  programId     String
-  program       Program       @relation(fields: [programId], references: [id])
-  templateId    String
-  template      ThesisTemplate @relation(fields: [templateId], references: [id])
-  title         String
-  advanceType   String
-  version       Int           @default(1)
-  fileKey       String
-  fileType      String
-  fileSizeBytes Int
-  pageCount     Int?
-  status        AdvanceStatus @default(PENDING)
-  aiAnalysis    AIAnalysis?
-  review        Review?
-  chunks        AdvanceChunk[]
-  plagiarismReport PlagiarismReport?
+  id                   String                @id @default(cuid())
+  studentId            String
+  student              User                  @relation(fields: [studentId], references: [id])
+  programId            String
+  program              Program               @relation(fields: [programId], references: [id])
+  templateId           String
+  template             ThesisTemplate        @relation(fields: [templateId], references: [id])
+  title                String
+  advanceType          String
+  version              Int                   @default(1)
+  fileKey              String
+  fileType             String
+  fileSizeBytes        Int
+  pageCount            Int?
+  status               AdvanceStatus         @default(PENDING)
+  aiAnalysis           AIAnalysis?
+  review               Review?
+  chunks               AdvanceChunk[]
+  plagiarismReport     PlagiarismReport?
   referenceValidations ReferenceValidation[]
-  plagiarismAlerts PlagiarismAlert[] @relation("PlagiarismAlertTarget")
-  createdAt     DateTime      @default(now())
-  updatedAt     DateTime      @updatedAt
+  plagiarismAlerts     PlagiarismAlert[]     @relation("PlagiarismAlertTarget")
+  createdAt            DateTime              @default(now())
+  updatedAt            DateTime              @updatedAt
 
   @@index([studentId])
   @@index([programId, status])
@@ -206,15 +207,15 @@ model PasswordResetToken {
 }
 
 model AdvanceChunk {
-  id          String   @id @default(cuid())
+  id          String                       @id @default(cuid())
   advanceId   String
-  advance     Advance  @relation(fields: [advanceId], references: [id], onDelete: Cascade)
+  advance     Advance                      @relation(fields: [advanceId], references: [id], onDelete: Cascade)
   programId   String
   sectionName String
   content     String
   chunkIndex  Int
   embedding   Unsupported("vector(1536)")?
-  createdAt   DateTime @default(now())
+  createdAt   DateTime                     @default(now())
 
   @@index([advanceId])
   @@index([programId])
@@ -222,15 +223,15 @@ model AdvanceChunk {
 }
 
 model PlagiarismReport {
-  id          String             @id @default(cuid())
-  advanceId   String             @unique
-  advance     Advance            @relation(fields: [advanceId], references: [id], onDelete: Cascade)
-  status      String             @default("pending")
+  id           String            @id @default(cuid())
+  advanceId    String            @unique
+  advance      Advance           @relation(fields: [advanceId], references: [id], onDelete: Cascade)
+  status       String            @default("pending")
   overallScore Float             @default(0)
-  method      String
-  alerts      PlagiarismAlert[]
-  analyzedAt  DateTime?
-  createdAt   DateTime           @default(now())
+  method       String
+  alerts       PlagiarismAlert[]
+  analyzedAt   DateTime?
+  createdAt    DateTime          @default(now())
 
   @@map("plagiarism_reports")
 }
@@ -283,26 +284,42 @@ enum ThesisDocumentType {
 }
 
 model ThesisDocument {
-  id              String               @id @default(cuid())
-  title           String
-  authors         String[]
-  advisor         String
-  lineOfResearch  String
-  city            String
-  year            Int
-  documentType    ThesisDocumentType
-  status          ThesisDocumentStatus @default(PENDING)
-  outputFormats   String[]
-  pdfKey          String?
-  docxKey         String?
-  metadata        Json?
-  userId          String
-  createdAt       DateTime             @default(now())
-  updatedAt       DateTime             @updatedAt
+  id             String               @id @default(cuid())
+  title          String
+  authors        String[]
+  advisor        String
+  lineOfResearch String
+  city           String
+  year           Int
+  documentType   ThesisDocumentType
+  status         ThesisDocumentStatus @default(PENDING)
+  outputFormats  String[]
+  pdfKey         String?
+  docxKey        String?
+  metadata       Json?
+  userId         String
+  createdAt      DateTime             @default(now())
+  updatedAt      DateTime             @updatedAt
 
   @@index([userId])
   @@index([status])
   @@map("thesis_documents")
+}
+
+model Notification {
+  id        String    @id @default(cuid())
+  userId    String
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type      String // 'review_complete' | 'ai_complete' | 'ai_failed'
+  title     String
+  message   String
+  advanceId String?
+  readAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  @@index([userId, readAt])
+  @@index([userId, createdAt])
+  @@map("notifications")
 }
 
 model AuditLog {

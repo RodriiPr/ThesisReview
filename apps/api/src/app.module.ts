@@ -19,6 +19,7 @@ import { UsersModule } from './users/users.module';
 import { StatsModule } from './stats/stats.module';
 import { StorageModule } from './storage/storage.module';
 import { TemplatesModule } from './templates/templates.module';
+import { PipelineModule } from './pipeline/pipeline.module';
 import { ThesisGeneratorModule } from './thesis-generator/thesis-generator.module';
 
 @Module({
@@ -55,6 +56,7 @@ import { ThesisGeneratorModule } from './thesis-generator/thesis-generator.modul
     UsersModule,
     FineTuningModule,
     ThesisGeneratorModule,
+    PipelineModule,
   ],
   controllers: [AppController],
   providers: [AppService],

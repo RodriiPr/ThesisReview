@@ -51,6 +51,15 @@ export class AdvancesController {
     return this.advancesService.listForStudent(req.user.id);
   }
 
+  @Get('versions/:advanceType')
+  @Roles('STUDENT')
+  versionHistory(
+    @Param('advanceType') advanceType: string,
+    @Request() req: { user: { id: string } },
+  ) {
+    return this.advancesService.getVersionHistory(req.user.id, advanceType);
+  }
+
   @Get()
   async list(
     @Request() req: { user: { id: string; role: string } },

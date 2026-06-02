@@ -2,6 +2,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import { AnalysisPipeline } from '@thesis-review/ai-engine';
 import { PrismaService } from '../prisma/prisma.service';
 import { StorageService } from '../storage/storage.service';
+import { NotificationService } from '../notifications/notification.service';
 
 @Injectable()
 export class AiAnalysisService {
@@ -11,6 +12,7 @@ export class AiAnalysisService {
   constructor(
     private prisma: PrismaService,
     private storage: StorageService,
+    private notifications: NotificationService,
   ) {
     this.pipeline = new AnalysisPipeline({
       openaiKey: process.env.OPENAI_API_KEY,
@@ -93,6 +95,8 @@ export class AiAnalysisService {
         where: { id: advanceId },
         data: { status: 'AI_COMPLETE' },
       });
+
+      await this.notifications.notifyAiComplete(advanceId);
 
       this.logger.log(`AI analysis completed for advance ${advanceId}`);
     } catch (err) {
