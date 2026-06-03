@@ -9,6 +9,7 @@ import { AppService } from './app.service';
 import { AuthModule } from './auth/auth.module';
 import { FineTuningModule } from './fine-tuning/fine-tuning.module';
 import { NotificationsModule } from './notifications/notifications.module';
+import { OrcidModule } from './orcid/orcid.module';
 import { PlagiarismModule } from './plagiarism/plagiarism.module';
 import { PrismaModule } from './prisma/prisma.module';
 import { ProgramsModule } from './programs/programs.module';
@@ -43,6 +44,7 @@ import { ThesisGeneratorModule } from './thesis-generator/thesis-generator.modul
     PrismaModule,
     StorageModule,
     NotificationsModule,
+    OrcidModule,
     AuthModule,
     ProgramsModule,
     TemplatesModule,

@@ -52,7 +52,42 @@ model User {
   createdAt     DateTime            @default(now())
   notifications Notification[]
 
+  orcidProfile     OrcidProfile?
   @@map("users")
+}
+
+model OrcidProfile {
+  id              String             @id @default(cuid())
+  userId          String             @unique
+  user            User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  orcidId         String             @unique
+  accessToken     String
+  refreshToken    String?
+  tokenExpiresAt  DateTime?
+  linkedAt        DateTime           @default(now())
+  updatedAt       DateTime           @updatedAt
+  publications    OrcidPublication[]
+
+  @@map("orcid_profiles")
+}
+
+model OrcidPublication {
+  id             String       @id @default(cuid())
+  orcidProfileId String
+  orcidProfile   OrcidProfile @relation(fields: [orcidProfileId], references: [id], onDelete: Cascade)
+  putCode        Int
+  title          String
+  doi            String?
+  journal        String?
+  year           Int?
+  authors        Json         @default("[]")
+  abstract       String?
+  url            String?
+  createdAt      DateTime     @default(now())
+
+  @@unique([orcidProfileId, putCode])
+  @@index([orcidProfileId])
+  @@map("orcid_publications")
 }
 
 model Program {

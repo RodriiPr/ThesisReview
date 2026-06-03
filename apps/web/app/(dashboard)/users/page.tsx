@@ -1,12 +1,12 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiClient } from '@/lib/api-client';
 import { AxiosError, isAxiosError } from 'axios';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
-import { Loader2, Plus, Pencil, Trash2, Check } from 'lucide-react';
+import { Loader2, Plus, Pencil, Trash2, Check, ExternalLink, BookOpen } from 'lucide-react';
 
 const ROLES = ['STUDENT', 'ADVISOR', 'COORDINATOR', 'ADMIN'];
 const ROLE_LABELS: Record<string, string> = {
@@ -163,6 +163,8 @@ export default function UsersPage() {
   const [editingUser, setEditingUser] = useState<User | null>(null);
   const [editRole, setEditRole] = useState('');
   const [editOrcid, setEditOrcid] = useState('');
+  const [orcidConnected, setOrcidConnected] = useState(false);
+  const [orcidPublications, setOrcidPublications] = useState<number>(0);
 
   const { data: users = [], isLoading } = useQuery<User[]>({
     queryKey: ['users', filterRole],
@@ -216,10 +218,53 @@ export default function UsersPage() {
     onError: () => toast.error('No se puede eliminar este usuario'),
   });
 
+  useEffect(() => {
+    const handler = (e: MessageEvent) => {
+      if (e.data?.type === 'ORCID_CONNECTED') {
+        toast.success('ORCID vinculado exitosamente');
+        qc.invalidateQueries({ queryKey: ['users'] });
+        checkOrcidStatus();
+      }
+      if (e.data?.type === 'ORCID_ERROR') {
+        toast.error('No se pudo vincular ORCID');
+      }
+    };
+    window.addEventListener('message', handler);
+    return () => window.removeEventListener('message', handler);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const checkOrcidStatus = useCallback(async () => {
+    try {
+      const { data } = await apiClient.get('/orcid/profile');
+      if (data.connected) {
+        setOrcidConnected(true);
+        setOrcidPublications(data.profile.publications?.length ?? 0);
+      } else {
+        setOrcidConnected(false);
+        setOrcidPublications(0);
+      }
+    } catch {
+      setOrcidConnected(false);
+      setOrcidPublications(0);
+    }
+  }, []);
+
+  const handleOrcidConnect = async () => {
+    try {
+      const { data } = await apiClient.get('/orcid/connect');
+      const w = window.open(data.url, 'orcid-connect', 'width=800,height=700');
+      if (!w) toast.error('Permite ventanas emergentes para conectar ORCID');
+    } catch {
+      toast.error('Error al iniciar conexion ORCID');
+    }
+  };
+
   const openEditDialog = (user: User) => {
     setEditingUser(user);
     setEditRole(user.role);
     setEditOrcid(user.orcid ?? '');
+    checkOrcidStatus();
   };
 
   const saveUserEdition = () => {
@@ -287,16 +332,32 @@ export default function UsersPage() {
               </div>
 
               <div>
-                <label className="text-xs text-gray-600 block mb-1">Codigo ORCID (manual)</label>
-                <input
-                  value={editOrcid}
-                  onChange={(e) => setEditOrcid(e.target.value)}
-                  className="w-full h-9 rounded-lg border border-gray-200 px-3 text-sm"
-                  placeholder="0000-0000-0000-0000"
-                />
+                <label className="text-xs text-gray-600 block mb-1">ORCID</label>
+                <div className="flex gap-2">
+                  <input
+                    value={editOrcid}
+                    onChange={(e) => setEditOrcid(e.target.value)}
+                    className="flex-1 h-9 rounded-lg border border-gray-200 px-3 text-sm"
+                    placeholder="0000-0000-0000-0000"
+                  />
+                  <button
+                    type="button"
+                    onClick={handleOrcidConnect}
+                    className="h-9 px-3 rounded-lg border border-gray-200 text-xs text-gray-600 hover:bg-gray-50 flex items-center gap-1.5"
+                  >
+                    <ExternalLink className="w-3.5 h-3.5" />
+                    Conectar
+                  </button>
+                </div>
                 <p className="text-[11px] text-gray-400 mt-1">
-                  Si el perfil ORCID es privado, puedes registrarlo manualmente aqui.
+                  Ingresa manualmente o usa &quot;Conectar&quot; para OAuth.
                 </p>
+                {orcidConnected && (
+                  <p className="text-[11px] text-green-600 mt-1 flex items-center gap-1">
+                    <BookOpen className="w-3 h-3" />
+                    ORCID vinculado · {orcidPublications} publicaciones
+                  </p>
+                )}
               </div>
             </div>
 
@@ -387,14 +448,19 @@ export default function UsersPage() {
                   </td>
                   <td className="px-4 py-3 text-xs">
                     {user.orcid ? (
-                      <a
-                        href={`https://orcid.org/${user.orcid}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-[#185FA5] hover:underline"
-                      >
-                        {user.orcid}
-                      </a>
+                      <div className="flex items-center gap-1.5">
+                        <a
+                          href={`https://orcid.org/${user.orcid}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-[#185FA5] hover:underline"
+                        >
+                          {user.orcid}
+                        </a>
+                        <span className="text-[10px] bg-green-50 text-green-700 px-1.5 py-0.5 rounded-full font-medium">
+                          OAuth
+                        </span>
+                      </div>
                     ) : (
                       <span className="text-gray-400">No Registrado</span>
                     )}

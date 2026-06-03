@@ -33,15 +33,17 @@ export class UsersService {
         role: true,
         programId: true,
         program: { select: { name: true } },
+        orcidProfile: { select: { orcidId: true } },
         createdAt: true,
         _count: { select: { advances: true, reviews: true } },
       },
       orderBy: [{ role: 'asc' }, { name: 'asc' }],
     });
 
-    const enrichedUsers: Array<Omit<(typeof users)[number], 'orcidManual'> & { orcid: string | null }> = [];
+    const enrichedUsers: Array<Omit<(typeof users)[number], 'orcidManual' | 'orcidProfile'> & { orcid: string | null }> = [];
     for (const user of users) {
-      const orcid = await this.resolveOrcid(user.name, user.email, user.orcidManual);
+      const oauthOrcid = user.orcidProfile?.orcidId ?? null;
+      const orcid = oauthOrcid ?? await this.resolveOrcid(user.name, user.email, user.orcidManual);
       enrichedUsers.push({
         id: user.id,
         name: user.name,
