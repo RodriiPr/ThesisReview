@@ -357,6 +357,22 @@ model Notification {
   @@map("notifications")
 }
 
+model ProjectDocumentation {
+  id         String                       @id @default(cuid())
+  title      String
+  content    String                       @db.Text
+  source     String                       // "architecture" | "code" | "thesis" | "readme" | "prompt"
+  module     String?                      // Para código: "advances", "auth", etc.
+  chunkIndex Int
+  parentId   String?                      // Para agrupar chunks del mismo documento
+  embedding  Unsupported("vector(1536)")?
+  createdAt  DateTime                     @default(now())
+
+  @@index([source])
+  @@index([module])
+  @@map("project_documentation")
+}
+
 model AuditLog {
   id        String   @id @default(cuid())
   userId    String

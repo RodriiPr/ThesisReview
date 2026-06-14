@@ -27,9 +27,7 @@ export interface AnalysisResult {
 }
 
 export interface PipelineOptions {
-  openaiKey?: string;
-  ollamaBaseUrl?: string;
-  ollamaModel?: string;
+  deepseekKey?: string;
+  deepseekModel?: string;
   maxGrade?: number;
-  model?: string;
 }

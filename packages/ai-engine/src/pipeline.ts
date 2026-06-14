@@ -3,51 +3,34 @@ import { extractText } from './extractor.js';
 import { buildAnalysisPrompt, buildReferenceExtractionPrompt } from './prompts.js';
 import { mockAnalyze } from './mock-analyzer.js';
 
-type LlmProvider = { type: 'openai'; apiKey: string; model: string } | { type: 'ollama'; baseUrl: string; model: string };
+type LlmProvider = { type: 'deepseek'; apiKey: string; model: string };
 
 function detectProvider(): LlmProvider {
-  const ollamaUrl = process.env.OLLAMA_BASE_URL || process.env.OLLAMA_HOST;
-  if (ollamaUrl) {
-    return { type: 'ollama', baseUrl: ollamaUrl, model: process.env.OLLAMA_MODEL || 'llama3.2' };
-  }
-  const key = process.env.OPENAI_API_KEY;
-  if (key) {
-    return { type: 'openai', apiKey: key, model: process.env.OPENAI_MODEL || 'gpt-4o-mini' };
-  }
-  return { type: 'openai', apiKey: '', model: 'gpt-4o-mini' };
+  const key = process.env.DEEPSEEK_API_KEY;
+  return {
+    type: 'deepseek',
+    apiKey: key || '',
+    model: process.env.DEEPSEEK_MODEL || 'deepseek-v4-flash',
+  };
 }
 
 async function createLlm(provider: LlmProvider, temperature = 0.2, maxTokens = 2048) {
-  if (provider.type === 'ollama') {
-    const { ChatOllama } = await import('@langchain/ollama');
-    return new ChatOllama({
-      baseUrl: provider.baseUrl,
-      model: provider.model,
-      temperature,
-      numPredict: maxTokens,
-    });
-  }
-  const { ChatOpenAI } = await import('@langchain/openai');
-  return new ChatOpenAI({
+  const { ChatDeepSeek } = await import('@langchain/deepseek');
+  return new ChatDeepSeek({
     apiKey: provider.apiKey,
-    modelName: provider.model,
+    model: provider.model,
     temperature,
     maxTokens,
   });
 }
 
-async function createEmbeddings(provider: LlmProvider) {
-  if (provider.type === 'ollama') {
-    const { OllamaEmbeddings } = await import('@langchain/ollama');
-    return new OllamaEmbeddings({
-      baseUrl: provider.baseUrl,
-      model: process.env.OLLAMA_EMBEDDING_MODEL || 'nomic-embed-text',
-    });
-  }
+async function createEmbeddings() {
+  const apiKey = process.env.OPENAI_API_KEY;
+  if (!apiKey) return null;
   const { OpenAIEmbeddings } = await import('@langchain/openai');
   return new OpenAIEmbeddings({
-    apiKey: provider.apiKey,
-    modelName: 'text-embedding-3-small',
+    apiKey,
+    modelName: process.env.EMBEDDING_MODEL || 'text-embedding-3-small',
   });
 }
 
@@ -68,10 +51,8 @@ export class AnalysisPipeline {
   constructor(options: PipelineOptions = {}) {
     this.maxGrade = options.maxGrade ?? 20;
 
-    if (options.ollamaBaseUrl) {
-      this.provider = { type: 'ollama', baseUrl: options.ollamaBaseUrl, model: options.ollamaModel || 'llama3.2' };
-    } else if (options.openaiKey) {
-      this.provider = { type: 'openai', apiKey: options.openaiKey, model: options.model || 'gpt-4o-mini' };
+    if (options.deepseekKey) {
+      this.provider = { type: 'deepseek', apiKey: options.deepseekKey, model: options.deepseekModel || 'deepseek-v4-flash' };
     } else {
       this.provider = detectProvider();
     }
@@ -89,7 +70,7 @@ export class AnalysisPipeline {
   ): Promise<AnalysisResult> {
     const start = Date.now();
 
-    if (this.provider.type === 'openai' && !this.provider.apiKey) {
+    if (!this.provider.apiKey) {
       return mockAnalyze(advanceText, this.maxGrade);
     }
 
@@ -158,7 +139,7 @@ export class AnalysisPipeline {
     doi: string | null;
     journal: string | null;
   }>> {
-    if (this.provider.type === 'openai' && !this.provider.apiKey) {
+    if (!this.provider.apiKey) {
       return [];
     }
 
@@ -182,12 +163,12 @@ export class AnalysisPipeline {
   }
 
   async generateEmbedding(text: string): Promise<number[]> {
-    if (this.provider.type === 'openai' && !this.provider.apiKey) {
+    const embeddings = await createEmbeddings();
+    if (!embeddings) {
       return Array.from({ length: 1536 }, () => Math.random() * 2 - 1);
     }
 
     try {
-      const embeddings = await createEmbeddings(this.provider);
       return embeddings.embedQuery(text.substring(0, 8000));
     } catch {
       return Array.from({ length: 1536 }, () => Math.random() * 2 - 1);

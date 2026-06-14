@@ -16,7 +16,7 @@ export class ThesisGeneratorService {
     private prisma: PrismaService,
     private storage: StorageService,
   ) {
-    this.contentGenerator = new ContentGenerator(process.env.OPENAI_API_KEY);
+    this.contentGenerator = new ContentGenerator(process.env.DEEPSEEK_API_KEY);
     this.pdfGenerator = new PdfGenerator();
   }
 

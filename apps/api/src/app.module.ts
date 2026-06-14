@@ -7,6 +7,7 @@ import { AiAnalysisModule } from './ai-analysis/ai-analysis.module';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { AuthModule } from './auth/auth.module';
+import { ChatbotModule } from './chatbot/chatbot.module';
 import { FineTuningModule } from './fine-tuning/fine-tuning.module';
 import { NotificationsModule } from './notifications/notifications.module';
 import { OrcidModule } from './orcid/orcid.module';
@@ -25,7 +26,10 @@ import { ThesisGeneratorModule } from './thesis-generator/thesis-generator.modul
 
 @Module({
   imports: [
-    ConfigModule.forRoot({ isGlobal: true }),
+    ConfigModule.forRoot({
+      isGlobal: true,
+      envFilePath: ['../.env', '.env'],
+    }),
     BullModule.forRoot({
         connection: process.env.REDIS_URL
         ? {
@@ -52,6 +56,7 @@ import { ThesisGeneratorModule } from './thesis-generator/thesis-generator.modul
     ReviewsModule,
     StatsModule,
     AiAnalysisModule,
+    ChatbotModule,
     PlagiarismModule,
     ReferencesModule,
     ReportsModule,

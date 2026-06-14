@@ -19,30 +19,17 @@ export interface GeneratedContent {
   annexes: string;
 }
 
-type LlmProvider = { type: 'openai'; apiKey: string; model: string } | { type: 'ollama'; baseUrl: string; model: string };
+type LlmProvider = { type: 'deepseek'; apiKey: string; model: string };
 
 function detectProvider(): LlmProvider {
-  const ollamaUrl = process.env.OLLAMA_BASE_URL || process.env.OLLAMA_HOST;
-  if (ollamaUrl) {
-    return { type: 'ollama', baseUrl: ollamaUrl, model: process.env.OLLAMA_MODEL || 'llama3.2' };
-  }
-  return { type: 'openai', apiKey: process.env.OPENAI_API_KEY || '', model: process.env.THESIS_GENERATOR_MODEL || 'gpt-4o-mini' };
+  return { type: 'deepseek', apiKey: process.env.DEEPSEEK_API_KEY || '', model: process.env.DEEPSEEK_MODEL || 'deepseek-v4-flash' };
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 async function createLlm(provider: LlmProvider): Promise<any> {
-  if (provider.type === 'ollama') {
-    const { ChatOllama } = await import('@langchain/ollama');
-    return new ChatOllama({
-      baseUrl: provider.baseUrl,
-      model: provider.model,
-      temperature: 0.7,
-      numPredict: 8192,
-    });
-  }
-  const { ChatOpenAI } = await import('@langchain/openai');
-  return new ChatOpenAI({
-    openAIApiKey: provider.apiKey,
+  const { ChatDeepSeek } = await import('@langchain/deepseek');
+  return new ChatDeepSeek({
+    apiKey: provider.apiKey,
     model: provider.model,
     temperature: 0.7,
     maxTokens: 8192,
@@ -242,12 +229,10 @@ Responde ÚNICAMENTE con el HTML del capítulo, sin etiquetas html/body/head adi
 export class ContentGenerator {
   private provider: LlmProvider;
 
-  constructor(apiKey?: string) {
+  constructor(deepseekKey?: string) {
     const envProvider = detectProvider();
-    if (envProvider.type === 'ollama') {
-      this.provider = envProvider;
-    } else if (apiKey) {
-      this.provider = { type: 'openai', apiKey, model: process.env.THESIS_GENERATOR_MODEL || 'gpt-4o-mini' };
+    if (deepseekKey) {
+      this.provider = { type: 'deepseek', apiKey: deepseekKey, model: process.env.DEEPSEEK_MODEL || 'deepseek-v4-flash' };
     } else {
       this.provider = envProvider;
     }

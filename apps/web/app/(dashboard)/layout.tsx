@@ -18,6 +18,7 @@ import {
   FileText,
 } from 'lucide-react';
 import { NotificationBell } from '@/components/notifications/NotificationBell';
+import { ChatbotButton } from '@/components/chatbot/ChatbotButton';
 
 const NAV_ITEMS = [
   { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard, roles: ['ADVISOR', 'COORDINATOR', 'ADMIN'] },
@@ -133,7 +134,10 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         )}
       </aside>
 
-      <main className="flex-1 overflow-y-auto">{children}</main>
+      <main className="flex-1 overflow-y-auto">
+        {children}
+        <ChatbotButton />
+      </main>
     </div>
   );
 }

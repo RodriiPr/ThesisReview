@@ -16,7 +16,7 @@ export class PlagiarismService {
     private storage: StorageService,
   ) {
     this.pipeline = new AnalysisPipeline({
-      openaiKey: process.env.OPENAI_API_KEY,
+      deepseekKey: process.env.DEEPSEEK_API_KEY,
     });
   }
 

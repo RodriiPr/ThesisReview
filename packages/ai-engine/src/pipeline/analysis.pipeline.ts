@@ -1,4 +1,3 @@
-import { ChatOpenAI, OpenAIEmbeddings } from '@langchain/openai';
 import { RecursiveCharacterTextSplitter } from 'langchain/text_splitter';
 import mammoth from 'mammoth';
 import pdfParse from 'pdf-parse';
@@ -32,30 +31,13 @@ Analiza el avance comparándolo con el documento patrón institucional.
 Responde ÚNICAMENTE con JSON válido sin markdown.`;
 
 export class AnalysisPipeline {
-  private llm: ChatOpenAI | null;
-  private embeddings: OpenAIEmbeddings | null;
   private splitter: RecursiveCharacterTextSplitter;
   private useMock: boolean;
   private maxGrade: number;
 
-  constructor(config: { openaiKey?: string; maxGrade: number }) {
+  constructor(config: { deepseekKey?: string; maxGrade: number }) {
     this.maxGrade = config.maxGrade;
-    this.useMock = !config.openaiKey;
-    if (!this.useMock) {
-      this.llm = new ChatOpenAI({
-        apiKey: config.openaiKey,
-        model: 'gpt-4o-mini',
-        temperature: 0.1,
-        modelKwargs: { response_format: { type: 'json_object' } },
-      });
-      this.embeddings = new OpenAIEmbeddings({
-        apiKey: config.openaiKey,
-        model: 'text-embedding-3-small',
-      });
-    } else {
-      this.llm = null;
-      this.embeddings = null;
-    }
+    this.useMock = !config.deepseekKey;
     this.splitter = new RecursiveCharacterTextSplitter({
       chunkSize: 1500,
       chunkOverlap: 200,
@@ -77,10 +59,20 @@ export class AnalysisPipeline {
   }
 
   async generateEmbeddings(chunks: string[]): Promise<number[][]> {
-    if (this.useMock || !this.embeddings) {
+    const apiKey = process.env.OPENAI_API_KEY;
+    if (!apiKey) {
       return chunks.map(() => Array(8).fill(0.1));
     }
-    return this.embeddings.embedDocuments(chunks);
+    try {
+      const { OpenAIEmbeddings } = await import('@langchain/openai');
+      const embeddings = new OpenAIEmbeddings({
+        apiKey,
+        model: process.env.EMBEDDING_MODEL || 'text-embedding-3-small',
+      });
+      return embeddings.embedDocuments(chunks);
+    } catch {
+      return chunks.map(() => Array(8).fill(0.1));
+    }
   }
 
   async analyze(
@@ -109,7 +101,14 @@ ${advanceText.substring(0, 8000)}
 
 Responde con JSON: { "scores": { "structure", "content", "form", "originality" }, "executiveSummary", "findings": [...] }`;
 
-    const response = await this.llm!.invoke([
+    const { ChatDeepSeek } = await import('@langchain/deepseek');
+    const llm = new ChatDeepSeek({
+      apiKey: process.env.DEEPSEEK_API_KEY,
+      model: process.env.DEEPSEEK_MODEL || 'deepseek-v4-flash',
+      temperature: 0.1,
+    });
+
+    const response = await llm.invoke([
       { role: 'system', content: SYSTEM_PROMPT },
       { role: 'user', content: userPrompt },
     ]);

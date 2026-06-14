@@ -15,7 +15,7 @@ export class AiAnalysisService {
     private notifications: NotificationService,
   ) {
     this.pipeline = new AnalysisPipeline({
-      openaiKey: process.env.OPENAI_API_KEY,
+      deepseekKey: process.env.DEEPSEEK_API_KEY,
       maxGrade: Number(process.env.MAX_GRADE ?? 20),
     });
   }
@@ -76,7 +76,7 @@ export class AiAnalysisService {
           gradeConverted: result.grade,
           executiveSummary: result.executiveSummary,
           processingMs: result.processingMs,
-          modelUsed: process.env.OPENAI_API_KEY ? 'gpt-4o-mini' : 'mock-analyzer',
+          modelUsed: process.env.DEEPSEEK_API_KEY ? 'deepseek-v4-flash' : 'mock-analyzer',
           findings: {
             create: result.findings.map((f) => ({
               sectionRef: f.sectionRef,

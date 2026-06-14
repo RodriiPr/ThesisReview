@@ -33,7 +33,7 @@ export class ReferencesService {
     private prisma: PrismaService,
     private storage: StorageService,
   ) {
-    this.pipeline = new AnalysisPipeline({ openaiKey: process.env.OPENAI_API_KEY });
+    this.pipeline = new AnalysisPipeline({ deepseekKey: process.env.DEEPSEEK_API_KEY });
   }
 
   async getReport(advanceId: string) {
